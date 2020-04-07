@@ -22,7 +22,8 @@
 
         <p v-else>Nenhuma tarefa criada.</p>
 
-        <TarefaSalvar v-if="exibirFormulario" />
+        <TarefaSalvar v-if="exibirFormulario"
+            @criar="criarTarefa" />
 
     </div>
 </template>
@@ -51,6 +52,18 @@ export default {
         .then((response) => {
             this.tarefas = response.data
         })
+    },
+    methods: {
+        criarTarefa(tarefa) {
+            // Requisição post com axios.
+            axios.post(`${config.apiURL}/tarefas`, tarefa)
+                .then((response) => {
+                    // Adicionando tarefa a lista local.
+                    this.tarefas.push(response.data)
+                    // Ocultando o componente
+                    this.exibirFormulario = false
+                })
+        }
     }
 }
 </script>
