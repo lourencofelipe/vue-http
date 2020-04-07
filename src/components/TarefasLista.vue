@@ -6,7 +6,7 @@
                 <h1 class="font-weight-light">Lista de Tarefas</h1>
             </div>
             <div class="col-sm-2">
-                <button class="btn btn-primary float-right" @click="exibirFormulario = !exibirFormulario">
+                <button class="btn btn-primary float-right" @click="exibirFormularioCriarTarefa">
                     <i class="fa fa-plus mr-2"></i>
                     <span>Criar</span>
                 </button>
@@ -18,7 +18,9 @@
                 v-for="tarefa in tarefas"
                 :key="tarefa.id"
                 :tarefa="tarefa"
-                @editar="selecionarTarefaParaEdicao" />
+                @editar="selecionarTarefaParaEdicao"
+                @deletar="deletarTarefa"
+                @concluir="editarTarefa" />
         </ul>
 
         <p v-else>Nenhuma tarefa criada.</p>
@@ -80,9 +82,26 @@ export default {
                 this.resetar()
             })
         },
+        deletarTarefa(tarefa) {
+            const confirmar = window.confirm(`Deseja deletar a tarefa com título "${tarefa.titulo}" ?`)
+            if(confirmar) {
+                axios.delete(`${config.apiURL}/tarefas/${tarefa.id}`)
+                    .then(() => {
+                        const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+                        this.tarefas.splice(indice, 1)
+                    })
+            }
+        },
         resetar() {
             this.tarefaSelecionada = undefined
             this.exibirFormulario = false
+        },
+        exibirFormularioCriarTarefa() {
+            if(this.tarefaSelecionada){
+                this.tarefaSelecionada = undefined
+                return
+            }
+            this.exibirFormulario = !this.exibirFormulario
         }
     }
 }
