@@ -23,7 +23,9 @@
                 @concluir="editarTarefa" />
         </ul>
 
-        <p v-else>Nenhuma tarefa criada.</p>
+        <p v-else-if="!mensagemErro">Nenhuma tarefa criada.</p>
+
+        <div class="alert alert-danger" v-else>{{ mensagemErro }}</div>
 
         <TarefaSalvar v-if="exibirFormulario"
             :tarefa="tarefaSelecionada"
@@ -35,8 +37,7 @@
 
 <script>
 
-import axios from 'axios'
-import config from './../config/config'
+import axios from './../axios'
 import TarefaSalvar from './TarefaSalvar.vue'
 import TarefasListaIten from './TarefasListaIten.vue'
 
@@ -49,21 +50,43 @@ export default {
         return {
             tarefas: [],
             exibirFormulario: false,
-            tarefaSelecionada: undefined
+            tarefaSelecionada: undefined,
+            mensagemErro: undefined
         }
     },
     created() {
         // Chamada get da API.
-        axios.get(`${config.apiURL}/tarefas`)
+        axios.get(`/tarefas`)
         .then((response) => {
             this.tarefas = response.data
+        }, error => {
+            return Promise.reject(error)
+        }).catch(error => {
+            console.log('Erro capturado no catch: ', error)
+            if(error.response){
+                this.mensagemErro = `Servidor retornou um erro: ${error.message} ${error.response.statusText}`
+            } else if(error.request){
+                this.mensagem = `Erro ao tentar comunicar com o servidor: ${error.message}`            
+            } else {
+                this.mensagemErro = `Erro ao fazer requisição ao servidor: ${error.message}`
+            }
         })
     },
     methods: {
         criarTarefa(tarefa) {
             // Requisição post com axios.
-            axios.post(`${config.apiURL}/tarefas`, tarefa)
-                .then((response) => {
+            // axios.post(`${}/tarefas`, tarefa)
+            //     .then((response) => {
+            //         // Adicionando tarefa a lista local.
+            //         this.tarefas.push(response.data)
+            //         // Ocultando o componente
+            //         this.resetar()
+            //     })
+            axios.request({
+                method: 'post',
+                url: `/tarefas`,
+                data: tarefa
+            }).then((response) => {
                     // Adicionando tarefa a lista local.
                     this.tarefas.push(response.data)
                     // Ocultando o componente
@@ -75,7 +98,7 @@ export default {
             this.exibirFormulario = true
         },
         editarTarefa(tarefa) {
-            axios.put(`${config.apiURL}/tarefas/${tarefa.id}`, tarefa)
+            axios.put(`/tarefas/${tarefa.id}`, tarefa)
             .then(() => {
                 const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
                 this.tarefas.splice(indice, 1, tarefa)
@@ -85,7 +108,7 @@ export default {
         deletarTarefa(tarefa) {
             const confirmar = window.confirm(`Deseja deletar a tarefa com título "${tarefa.titulo}" ?`)
             if(confirmar) {
-                axios.delete(`${config.apiURL}/tarefas/${tarefa.id}`)
+                axios.delete(`/tarefas/${tarefa.id}`)
                     .then(() => {
                         const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
                         this.tarefas.splice(indice, 1)
