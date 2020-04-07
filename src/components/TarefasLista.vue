@@ -1,7 +1,17 @@
 <template>
     <div>
 
-        <h1 class="font-weight-light">Lista de Tarefas</h1>
+        <div class="row">
+            <div class="col-sm-10">
+                <h1 class="font-weight-light">Lista de Tarefas</h1>
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary float-right" @click="exibirFormulario = !exibirFormulario">
+                    <i class="fa fa-plus mr-2"></i>
+                    <span>Criar</span>
+                </button>
+            </div>
+        </div>
 
         <ul class="list-group" v-if="tarefas.length > 0">
             <TarefasListaIten
@@ -12,7 +22,7 @@
 
         <p v-else>Nenhuma tarefa criada.</p>
 
-        <TarefaSalvar />
+        <TarefaSalvar v-if="exibirFormulario" />
 
     </div>
 </template>
@@ -31,11 +41,12 @@ export default {
     },
     data() {
         return {
-            tarefas: []
+            tarefas: [],
+            exibirFormulario: false
         }
     },
     created() {
-        // Chamada get da API
+        // Chamada get da API.
         axios.get(`${config.apiURL}/tarefas`)
         .then((response) => {
             this.tarefas = response.data
