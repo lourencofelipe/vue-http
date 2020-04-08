@@ -105,14 +105,21 @@ export default {
                 this.resetar()
             })
         },
-        deletarTarefa(tarefa) {
+        async deletarTarefa(tarefa) {
             const confirmar = window.confirm(`Deseja deletar a tarefa com título "${tarefa.titulo}" ?`)
             if(confirmar) {
-                axios.delete(`/tarefas/${tarefa.id}`)
-                    .then(() => {
-                        const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
-                        this.tarefas.splice(indice, 1)
-                    })
+                // axios.delete(`/tarefas/${tarefa.id}`)
+                //     .then(() => {
+                //         const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+                //         this.tarefas.splice(indice, 1)
+                //     })
+                try{
+                    const response = await axios.delete(`/tarefas/${tarefa.id}`)
+                    const indice = this.tarefas.findIndex(t => t.id === tarefa.id)
+                    this.tarefas.splice(indice, 1)
+                } catch (error) {
+                    console.log('Erro ao excluir tarefa: ' error)
+                }
             }
         },
         resetar() {
